@@ -1,11 +1,13 @@
 package com.hcy.esArsenal.wrapper;
 
+import com.hcy.esArsenal.dto.Range;
 import com.hcy.esArsenal.enums.AnalyzerType;
 import com.hcy.esArsenal.enums.LinkType;
 import com.hcy.esArsenal.enums.QueryType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.slf4j.Logger;
@@ -33,21 +35,22 @@ public abstract class EsAbstractQueryWrapper {
     }
 
     /**
+     * @return void
      * @Author huchenying
      * @Description 添加QueryBuilder到BoolQueryBuilder中
      * @Date 2021/8/23 10:48
      * @Param [name, text, type, linkType]
-     * @return void
      **/
     public void doIt(String name, String text, QueryType type, LinkType linkType) {
         QueryBuilder queryBuilder = getQueryBuilder(type, name, text);
         if (queryBuilder != null) {
-            logger.error("错误的查询类型.");
-            switch (linkType){
+            switch (linkType) {
                 case OR:
-                    boolQueryBuilder.should(queryBuilder);break;
+                    boolQueryBuilder.should(queryBuilder);
+                    break;
                 case AND:
-                    boolQueryBuilder.must(queryBuilder);break;
+                    boolQueryBuilder.must(queryBuilder);
+                    break;
                 default:
                     logger.error("error LinkType!");
             }
@@ -55,51 +58,85 @@ public abstract class EsAbstractQueryWrapper {
     }
 
     /**
+     * @return org.elasticsearch.index.query.QueryBuilder
      * @Author huchenying
      * @Description 通过枚举类型获取QueryBuilder
      * @Date 2021/8/23 10:26
      * @Param [type, name, text]
-     * @return org.elasticsearch.index.query.QueryBuilder
      **/
     private QueryBuilder getQueryBuilder(QueryType type, String name, String text) {
 
         switch (type) {
             case MATCH:
-                return QueryBuilders.matchQuery(name, text).analyzer(analyzer.getName());
+                matchQuery(type, name, text);
             case MATCHALL:
-                return QueryBuilders.matchAllQuery().queryName(text);
+                matchAllQuery(type, name, text);
             case TERM:
-                return QueryBuilders.termQuery(name, text);
+                termQuery(type, name, text);
+            case RANGE:
+                rangeQuery(type, name, text); //需要解决方法适配问题
             default:
                 return null;
         }
     }
 
+    public QueryBuilder matchQuery(QueryType type, String name, String text) {
+        return QueryBuilders.matchQuery(name, text).analyzer(analyzer.getName());
+    }
+
+    public QueryBuilder matchAllQuery(QueryType type, String name, String text) {
+        return QueryBuilders.matchAllQuery().queryName(text);
+    }
+
+    public QueryBuilder termQuery(QueryType type, String name, String text) {
+        return QueryBuilders.termQuery(name, text);
+    }
+
+    public QueryBuilder rangeQuery(QueryType type, String name, Range range) {
+
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(name);
+
+        switch (range.getRangeType()) {
+            case GT:
+                rangeQueryBuilder.gt(range.getValue());
+            case GTE:
+                rangeQueryBuilder.gte(range.getValue());
+            case LT:
+                rangeQueryBuilder.lt(range.getValue());
+            case LTE:
+                rangeQueryBuilder.lte(range.getValue());
+        }
+
+        range.getRangeType();
+        return QueryBuilders.rangeQuery(name);
+    }
+
+
     /**
+     * @return org.elasticsearch.search.builder.SearchSourceBuilder
      * @Author huchenying
      * @Description 获取SearchSourceBuilder
      * @Date 2021/8/23 10:26
      * @Param []
-     * @return org.elasticsearch.search.builder.SearchSourceBuilder
      **/
     public SearchSourceBuilder getSearchSource() {
         searchSourceBuilder.query(boolQueryBuilder);
         return searchSourceBuilder;
     }
 
-    public void setAnalyzer(AnalyzerType analyzer){
+    public void setAnalyzer(AnalyzerType analyzer) {
         this.analyzer = analyzer;
     }
 
-    public void setHighlight(HighlightBuilder highlight){
+    public void setHighlight(HighlightBuilder highlight) {
         searchSourceBuilder.highlighter(highlight);
     }
 
-    public void setFrom(int from){
+    public void setFrom(int from) {
         searchSourceBuilder.from(from);
     }
 
-    public void setSize(int size){
+    public void setSize(int size) {
         searchSourceBuilder.size(size);
     }
 

@@ -35,7 +35,7 @@ public class EsDoor {
      * @Date 2021/8/23 11:58
      * @Param [index=索引枚举, esQueryWrapper]
      **/
-    public List<Map<String, Object>> query(String index, EsQueryWrapper esQueryWrapper) {
+    public List<Map<String, Object>> query(String index, EsQueryWrapper<?> esQueryWrapper) {
         List<Map<String, Object>> maps = Collections.emptyList();
         try {
             maps = esCoreOpt.searchListData(index, getSearchSource(esQueryWrapper), getHighlightField(esQueryWrapper));
@@ -53,7 +53,7 @@ public class EsDoor {
      * @Date 2021/8/23 11:55
      * @Param [esQueryWrapper]
      **/
-    public List<HighlightBuilder.Field> getHighlightField(EsQueryWrapper esQueryWrapper) {
+    public List<HighlightBuilder.Field> getHighlightField(EsQueryWrapper<?> esQueryWrapper) {
         return esQueryWrapper.getSearchSource().highlighter().fields();
     }
 
@@ -64,7 +64,7 @@ public class EsDoor {
      * @Date 2021/8/23 11:55
      * @Param [esQueryWrapper]
      **/
-    public SearchSourceBuilder getSearchSource(EsQueryWrapper esQueryWrapper) {
+    public SearchSourceBuilder getSearchSource(EsQueryWrapper<?> esQueryWrapper) {
         return esQueryWrapper.getSearchSource();
     }
 

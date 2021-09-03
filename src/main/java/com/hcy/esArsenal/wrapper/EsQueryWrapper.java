@@ -90,6 +90,13 @@ public class EsQueryWrapper<T> extends EsAbstractQueryWrapper {
         return this;
     }
 
+    public EsQueryWrapper<T> gt(Func<T, ?> field, String text,boolean condition){
+        if (condition){
+            doIt(getColumn(field),text,QueryType.RANGE,LinkType.AND);
+        }
+        return this;
+    }
+
     /**
      * @Author huchenying
      * @Description 通过lambda获取列名

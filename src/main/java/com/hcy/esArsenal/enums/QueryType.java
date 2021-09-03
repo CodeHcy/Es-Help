@@ -10,5 +10,5 @@ package com.hcy.esArsenal.enums;
  * @Date 2021/8/17
  **/
 public enum QueryType {
-    MATCH,MATCHALL,TERM
+    MATCH,MATCHALL,TERM,RANGE
 }
