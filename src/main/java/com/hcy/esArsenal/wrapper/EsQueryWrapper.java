@@ -43,6 +43,12 @@ public class EsQueryWrapper<T> extends EsAbstractQueryWrapper {
         doIt(getColumn(field),text, QueryType.MATCHALL,LinkType.OR);
         return this;
     }
+    public EsQueryWrapper<T> queryAll(Func<T, ?> field, String text,boolean condition){
+        if (condition){
+            doIt(getColumn(field),text, QueryType.MATCHALL,LinkType.OR);
+        }
+        return this;
+    }
 
     /**
      * @Author huchenying
@@ -67,6 +73,20 @@ public class EsQueryWrapper<T> extends EsAbstractQueryWrapper {
      **/
     public EsQueryWrapper<T> eq(Func<T, ?> field, String text){
         doIt(getColumn(field),text,QueryType.TERM, LinkType.AND);
+        return this;
+    }
+
+    /**
+     * @Author huchenying
+     * @Description 
+     * @Date 2021/9/3 17:30
+     * @Param [field, text, condition]
+     * @return com.hcy.esArsenal.wrapper.EsQueryWrapper<T>
+     **/
+    public EsQueryWrapper<T> eq(Func<T, ?> field, String text,boolean condition){
+        if (condition){
+            doIt(getColumn(field),text,QueryType.TERM, LinkType.AND);
+        }
         return this;
     }
 
