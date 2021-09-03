@@ -1,8 +1,12 @@
 ###### Es-helper 
+
 为了便捷连接操作elasticsearch,简单方便
 
+适合 Es 7.x
+详情见 pom.xml
+
 步骤：
-1.配置es的连接地址（前提：已经引入了es 7.x 相关的包）
+1.配置es的连接地址
 ```
 spring:
     elasticsearch:
