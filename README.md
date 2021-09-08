@@ -22,7 +22,7 @@ spring:
 ###### 3.直接使用(只需要你定义好索引对应的实体类，就可以通过lambda的方式，避免写列名。)
 ```
  EsQueryWrapper<EsUserDTO> userEsQueryWrapper = new EsQueryWrapper<>();
-         userEsQueryWrapper.query(EsUserDTO::getName,text);
+         userEsQueryWrapper.like(EsUserDTO::getName,text);
          userEsQueryWrapper.highlight(EsUserDTO::getName);
          List<Map<String, Object>> query = esDoor.query("索引名", userEsQueryWrapper);
 ```
