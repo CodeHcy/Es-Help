@@ -13,6 +13,8 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
  * @Author huchenying
  * @Description query父类
@@ -23,7 +25,7 @@ public abstract class EsAbstractQueryWrapper {
     private static final Logger logger = LoggerFactory.getLogger(EsAbstractQueryWrapper.class);
 
     public SearchSourceBuilder searchSourceBuilder;
-    private BoolQueryBuilder boolQueryBuilder;
+    private final BoolQueryBuilder boolQueryBuilder;
     public AnalyzerType analyzer;
 
     public EsAbstractQueryWrapper() {
@@ -43,6 +45,31 @@ public abstract class EsAbstractQueryWrapper {
      **/
     public void doIt(String name, String text, QueryType type, LinkType linkType) {
         QueryBuilder queryBuilder = getQueryBuilder(type, name, text);
+        merge(queryBuilder, linkType);
+    }
+
+    /**
+     * @return void
+     * @Author huchenying
+     * @Description 添加QueryBuilder到BoolQueryBuilder中
+     * @Date 2021/8/23 10:48
+     * @Param [name, text, type, linkType]
+     **/
+    public void doIt(String name, Range range, QueryType type, LinkType linkType) {
+        if (type == QueryType.RANGE) {
+            QueryBuilder queryBuilder = rangeQuery(name, range);
+            merge(queryBuilder, linkType);
+        }
+    }
+
+    /**
+     * @return void
+     * @Author huchenying
+     * @Description 合并查询
+     * @Date 2021/9/8 14:09
+     * @Param [queryBuilder, linkType]
+     **/
+    private void merge(QueryBuilder queryBuilder, LinkType linkType) {
         if (queryBuilder != null) {
             switch (linkType) {
                 case OR:
@@ -60,7 +87,7 @@ public abstract class EsAbstractQueryWrapper {
     /**
      * @return org.elasticsearch.index.query.QueryBuilder
      * @Author huchenying
-     * @Description 通过枚举类型获取QueryBuilder
+     * @Description 通过枚举类型获取QueryBuilder，普通的条件
      * @Date 2021/8/23 10:26
      * @Param [type, name, text]
      **/
@@ -68,31 +95,36 @@ public abstract class EsAbstractQueryWrapper {
 
         switch (type) {
             case MATCH:
-                matchQuery(type, name, text);
+                return matchQuery(name, text);
             case MATCHALL:
-                matchAllQuery(type, name, text);
+                return matchAllQuery(text);
             case TERM:
-                termQuery(type, name, text);
-            case RANGE:
-                rangeQuery(type, name, text); //需要解决方法适配问题
+                return termQuery(name, text);
             default:
                 return null;
         }
     }
 
-    public QueryBuilder matchQuery(QueryType type, String name, String text) {
+    public QueryBuilder matchQuery(String name, String text) {
         return QueryBuilders.matchQuery(name, text).analyzer(analyzer.getName());
     }
 
-    public QueryBuilder matchAllQuery(QueryType type, String name, String text) {
+    public QueryBuilder matchAllQuery(String text) {
         return QueryBuilders.matchAllQuery().queryName(text);
     }
 
-    public QueryBuilder termQuery(QueryType type, String name, String text) {
+    public QueryBuilder termQuery(String name, String text) {
         return QueryBuilders.termQuery(name, text);
     }
 
-    public QueryBuilder rangeQuery(QueryType type, String name, Range range) {
+    /**
+     * @return org.elasticsearch.index.query.QueryBuilder
+     * @Author huchenying
+     * @Description 范围查找
+     * @Date 2021/9/8 14:10
+     * @Param [type, name, range]
+     **/
+    public QueryBuilder rangeQuery(String name, Range range) {
 
         RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(name);
 
@@ -106,8 +138,6 @@ public abstract class EsAbstractQueryWrapper {
             case LTE:
                 rangeQueryBuilder.lte(range.getValue());
         }
-
-        range.getRangeType();
         return QueryBuilders.rangeQuery(name);
     }
 
@@ -129,6 +159,9 @@ public abstract class EsAbstractQueryWrapper {
     }
 
     public void setHighlight(HighlightBuilder highlight) {
+        if (searchSourceBuilder.highlighter() != null){
+            highlight.fields().addAll(searchSourceBuilder.highlighter().fields());
+        }
         searchSourceBuilder.highlighter(highlight);
     }
 
