@@ -7,19 +7,20 @@
 详情见 pom.xml
 
 ### 步骤：
-###### 1.配置es的连接地址
+###### 1.打包引入
+###### 2.配置es的连接地址
 ```
 spring:
     elasticsearch:
         rest:
         uris: 172.16.2.219:9200
 ```
-###### 2.注入EsDoor
+###### 3.注入EsDoor
 ```
     @Resource
      private EsDoor esDoor;
 ```
-###### 3.直接使用(只需要你定义好索引对应的实体类，就可以通过lambda的方式，避免写列名。)
+###### 4.直接使用(只需要你定义好索引对应的实体类，就可以通过lambda的方式，避免写列名。)
 ```
  EsQueryWrapper<EsUserDTO> userEsQueryWrapper = new EsQueryWrapper<>();
          userEsQueryWrapper.like(EsUserDTO::getName,text);
