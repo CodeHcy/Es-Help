@@ -24,9 +24,9 @@ public abstract class EsAbstractQueryWrapper {
 
     private static final Logger logger = LoggerFactory.getLogger(EsAbstractQueryWrapper.class);
 
-    public SearchSourceBuilder searchSourceBuilder;
+    private final SearchSourceBuilder searchSourceBuilder;
     private final BoolQueryBuilder boolQueryBuilder;
-    public AnalyzerType analyzer;
+    private AnalyzerType analyzer;
 
     public EsAbstractQueryWrapper() {
         searchSourceBuilder = SearchSourceBuilder.searchSource();
